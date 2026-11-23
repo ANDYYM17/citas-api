@@ -1,0 +1,13 @@
+# Use this workspace to collaborate
+workspace:
+  id: 4a8c9aa7-dd59-4366-83fe-3ade407f197d
+
+cloudResources:
+  collections:
+    ../postman/collections/citas-api: 29fc757f-7ce8-44c2-89cd-3d90df4f2c84
+
+# All resources in the `postman/` folder are automatically registered in Local View.
+# Point to additional files outside the `postman/` folder to register them individually. Example:
+#localResources:
+#  collections:
+#    - ../tests/E2E Test Collection/

@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/api/servicios/999"
+method: PUT
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "titulo": "{{tituloPrueba}}",
+      "descripcion": "Masaje en puntos de los pies",
+      "costo": 85,
+      "duracion": 40,
+      "foto": null,
+      "activo": true
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("HTTP 404", function () { pm.response.to.have.status(404); });
+    language: text/javascript
+order: 17000

@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/api/servicios"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "titulo": "{{tituloPrueba}}",
+      "descripcion": "Masaje en puntos de los pies",
+      "costo": 85,
+      "duracion": 40,
+      "foto": null,
+      "activo": true
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 409", function () { pm.response.to.have.status(409); });
+      pm.test("Mensaje de error", function () { pm.expect(pm.response.json().message).to.include("Ya existe un servicio con ese título"); });
+    language: text/javascript
+order: 14000

@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/api/servicios"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "titulo": "",
+      "costo": -5,
+      "duracion": 5
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 400", function () { pm.response.to.have.status(400); });
+      pm.test("Errores de validación", function () { pm.expect(pm.response.json().errors).to.be.an("array").that.is.not.empty; });
+    language: text/javascript
+order: 15000

@@ -1,0 +1,10 @@
+$kind: collection
+scripts:
+  - type: http:beforeRequest
+    code: |-
+      if (pm.info.requestName.startsWith("01")) {
+          pm.collectionVariables.set("tituloPrueba", "Reflexología prueba " + Date.now());
+          pm.collectionVariables.unset("servicioCreadoId");
+      }
+    language: text/javascript
+order: 2000

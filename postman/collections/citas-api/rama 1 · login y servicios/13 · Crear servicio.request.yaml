@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/api/servicios"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "titulo": "{{tituloPrueba}}",
+      "descripcion": "Masaje en puntos de los pies",
+      "costo": 85,
+      "duracion": 40,
+      "foto": null,
+      "activo": true
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 201", function () { pm.response.to.have.status(201); });
+      if (pm.response.code === 201) { pm.collectionVariables.set("servicioCreadoId", pm.response.json().id); }
+      pm.test("Servicio persistido", function () { const datos = pm.response.json(); pm.expect(datos.id).to.be.a("number"); pm.expect(datos.titulo).to.eql(pm.collectionVariables.get("tituloPrueba")); pm.expect(datos.costo).to.eql(85); pm.expect(datos.activo).to.eql(true); });
+    language: text/javascript
+order: 13000

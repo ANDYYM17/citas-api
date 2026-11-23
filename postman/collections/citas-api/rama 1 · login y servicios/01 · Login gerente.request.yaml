@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/login"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "gerente@terapias.pe",
+      "password": "Clave123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 200", function () { pm.response.to.have.status(200); });
+      pm.test("Datos de sesión y rol", function () { const datos = pm.response.json(); pm.expect(datos.rol).to.eql("GERENTE"); pm.expect(datos.email).to.eql("gerente@terapias.pe"); pm.expect(datos).to.have.all.keys("usuarioId", "email", "rol"); });
+    language: text/javascript
+order: 1000

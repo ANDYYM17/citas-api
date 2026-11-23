@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/login"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "diego.ramirez@terapias.pe",
+      "password": "Clave123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 403", function () { pm.response.to.have.status(403); });
+      pm.test("Mensaje de error", function () { pm.expect(pm.response.json().message).to.include("El usuario está inactivo"); });
+    language: text/javascript
+order: 5000
