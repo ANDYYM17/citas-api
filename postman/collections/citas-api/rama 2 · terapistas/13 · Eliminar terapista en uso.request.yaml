@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/api/terapistas/1"
+method: DELETE
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 409", function () { pm.response.to.have.status(409); });
+      pm.test("Mensaje de error", function () { pm.expect(pm.response.json().message).to.include("No se puede eliminar"); });
+    language: text/javascript
+order: 13000

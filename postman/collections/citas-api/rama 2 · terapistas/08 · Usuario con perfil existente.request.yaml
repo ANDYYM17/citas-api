@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/api/terapistas"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "usuarioId": 23,
+      "nombres": "Valeria",
+      "apellidos": "Torres Rojas",
+      "dni": "49012346",
+      "telefono": "987100207",
+      "activo": true
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 409", function () { pm.response.to.have.status(409); });
+      pm.test("Mensaje de error", function () { pm.expect(pm.response.json().message).to.include("Ese usuario ya tiene un perfil de terapista"); });
+    language: text/javascript
+order: 8000

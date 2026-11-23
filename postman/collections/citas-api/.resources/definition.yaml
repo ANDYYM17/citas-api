@@ -1,7 +1,8 @@
 $kind: collection
-description: Pruebas de la sección 5.1 de la guía SENATI (páginas 35–36). Ejecutar la colección completa en orden. El título del servicio de prueba se genera para cada ejecución y el servicio se elimina al finalizar. Para Codespaces cambia baseUrl por la dirección del puerto 8080 y perfilEsperado a demo.
+description: Pruebas de las secciones 5.1 y 5.2 de la guía SENATI (páginas 35–36 y 43–44). Ejecutar la colección completa en orden: main, rama 1 y rama 2. Los registros creados para las pruebas se eliminan al finalizar. Para Codespaces cambia baseUrl por la dirección del puerto 8080, sin barra final, y perfilEsperado a demo.
 variables:
   baseUrl: http://localhost:8080
   perfilEsperado: dev
   tituloPrueba: ""
   servicioCreadoId: ""
+  terapistaCreadaId: ""

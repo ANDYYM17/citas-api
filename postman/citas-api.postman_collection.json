@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "citas-api",
-    "description": "Pruebas de la sección 5.1 de la guía SENATI (páginas 35–36). Ejecutar la colección completa en orden. El título del servicio de prueba se genera para cada ejecución y el servicio se elimina al finalizar. Para Codespaces cambia baseUrl por la dirección del puerto 8080 y perfilEsperado a demo.",
+    "description": "Pruebas de las secciones 5.1 y 5.2 de la guía SENATI (páginas 35–36 y 43–44). Ejecutar la colección completa en orden: main, rama 1 y rama 2. Los registros creados para las pruebas se eliminan al finalizar. Para Codespaces cambia baseUrl por la dirección del puerto 8080, sin barra final, y perfilEsperado a demo.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -22,6 +22,11 @@
     },
     {
       "key": "servicioCreadoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "terapistaCreadaId",
       "value": "",
       "type": "string"
     }
@@ -722,6 +727,464 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rama 2 · terapistas",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.info.requestName.startsWith(\"01\")) {",
+              "    pm.collectionVariables.unset(\"terapistaCreadaId\");",
+              "}"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "01 · Listar terapistas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Lista con datos de prueba\", function () { pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 · Listar terapistas activas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas/activos"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Todas las terapistas están activas\", function () { const datos = pm.response.json(); pm.expect(datos).to.be.an(\"array\").that.is.not.empty; datos.forEach(terapista => pm.expect(terapista.activo).to.eql(true)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 · Buscar terapistas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas/buscar?texto=gut"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Coincidencia en nombres o apellidos\", function () { const datos = pm.response.json(); pm.expect(datos).to.be.an(\"array\").that.is.not.empty; datos.forEach(terapista => pm.expect((terapista.nombres + \" \" + terapista.apellidos).toLowerCase()).to.include(\"gut\")); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 · Obtener terapista 1",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas/1"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Terapista solicitada\", function () { pm.expect(pm.response.json().id).to.eql(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 · Obtener terapista inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas/999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 · DNI repetido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 23,\n  \"nombres\": \"Valeria\",\n  \"apellidos\": \"Torres Rojas\",\n  \"dni\": \"41257893\",\n  \"telefono\": \"987100207\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"Ya existe una terapista con ese DNI\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 · Crear terapista con usuario 23",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 23,\n  \"nombres\": \"Valeria\",\n  \"apellidos\": \"Torres Rojas\",\n  \"dni\": \"49012345\",\n  \"telefono\": \"987100207\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"terapistaCreadaId\", pm.response.json().id); }",
+                  "pm.test(\"Perfil creado para el usuario 23\", function () { const datos = pm.response.json(); pm.expect(datos.id).to.be.a(\"number\"); pm.expect(datos.usuarioId).to.eql(23); pm.expect(datos.dni).to.eql(\"49012345\"); pm.expect(datos.activo).to.eql(true); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 · Usuario con perfil existente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 23,\n  \"nombres\": \"Valeria\",\n  \"apellidos\": \"Torres Rojas\",\n  \"dni\": \"49012346\",\n  \"telefono\": \"987100207\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"Ese usuario ya tiene un perfil de terapista\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 · Usuario sin rol TERAPISTA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 13,\n  \"nombres\": \"Valeria\",\n  \"apellidos\": \"Torres Rojas\",\n  \"dni\": \"49012347\",\n  \"telefono\": \"987100207\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"El usuario 13 no tiene el rol TERAPISTA\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 · Usuario inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 999,\n  \"nombres\": \"Valeria\",\n  \"apellidos\": \"Torres Rojas\",\n  \"dni\": \"49012348\",\n  \"telefono\": \"987100207\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"El usuario 999 no existe\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11 · DNI y celular inválidos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 23,\n  \"nombres\": \"Valeria\",\n  \"apellidos\": \"Torres Rojas\",\n  \"dni\": \"123\",\n  \"telefono\": \"12345\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Validaciones de DNI y celular\", function () { const errores = pm.response.json().errors; pm.expect(errores).to.be.an(\"array\"); pm.expect(errores.map(error => error.field)).to.include.members([\"dni\", \"telefono\"]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12 · Actualizar terapista creada",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas/{{terapistaCreadaId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 23,\n  \"nombres\": \"Valeria\",\n  \"apellidos\": \"Torres Rojas\",\n  \"dni\": \"49012345\",\n  \"telefono\": \"987100299\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Datos actualizados\", function () { const datos = pm.response.json(); pm.expect(datos.id).to.eql(Number(pm.collectionVariables.get(\"terapistaCreadaId\"))); pm.expect(datos.usuarioId).to.eql(23); pm.expect(datos.telefono).to.eql(\"987100299\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 · Eliminar terapista en uso",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas/1"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"No se puede eliminar\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "14 · Eliminar terapista creada",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/terapistas/{{terapistaCreadaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
                 ]
               }
             }

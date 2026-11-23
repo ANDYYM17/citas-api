@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/api/terapistas"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "usuarioId": 23,
+      "nombres": "Valeria",
+      "apellidos": "Torres Rojas",
+      "dni": "123",
+      "telefono": "12345",
+      "activo": true
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 400", function () { pm.response.to.have.status(400); });
+      pm.test("Validaciones de DNI y celular", function () { const errores = pm.response.json().errors; pm.expect(errores).to.be.an("array"); pm.expect(errores.map(error => error.field)).to.include.members(["dni", "telefono"]); });
+    language: text/javascript
+order: 11000
