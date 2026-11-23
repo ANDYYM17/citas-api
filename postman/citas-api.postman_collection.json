@@ -1,0 +1,733 @@
+{
+  "info": {
+    "name": "citas-api",
+    "description": "Pruebas de la sección 5.1 de la guía SENATI (páginas 35–36). Ejecutar la colección completa en orden. El título del servicio de prueba se genera para cada ejecución y el servicio se elimina al finalizar. Para Codespaces cambia baseUrl por la dirección del puerto 8080 y perfilEsperado a demo.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "perfilEsperado",
+      "value": "dev",
+      "type": "string"
+    },
+    {
+      "key": "tituloPrueba",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "servicioCreadoId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "main",
+      "item": [
+        {
+          "name": "Inicio y perfil",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"API y perfil\", function () { const datos = pm.response.json(); pm.expect(datos.proyecto).to.eql(\"citas-api\"); pm.expect(datos.estado).to.eql(\"OK\"); pm.expect(datos.perfil).to.eql(pm.variables.get(\"perfilEsperado\")); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rama 1 · login y servicios",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.info.requestName.startsWith(\"01\")) {",
+              "    pm.collectionVariables.set(\"tituloPrueba\", \"Reflexología prueba \" + Date.now());",
+              "    pm.collectionVariables.unset(\"servicioCreadoId\");",
+              "}"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "01 · Login gerente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"gerente@terapias.pe\",\n  \"password\": \"Clave123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Datos de sesión y rol\", function () { const datos = pm.response.json(); pm.expect(datos.rol).to.eql(\"GERENTE\"); pm.expect(datos.email).to.eql(\"gerente@terapias.pe\"); pm.expect(datos).to.have.all.keys(\"usuarioId\", \"email\", \"rol\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 · Login admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@terapias.pe\",\n  \"password\": \"Clave123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Datos de sesión y rol\", function () { const datos = pm.response.json(); pm.expect(datos.rol).to.eql(\"ADMIN\"); pm.expect(datos.email).to.eql(\"admin@terapias.pe\"); pm.expect(datos).to.have.all.keys(\"usuarioId\", \"email\", \"rol\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 · Contraseña incorrecta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"gerente@terapias.pe\",\n  \"password\": \"otra\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"Correo o contraseña incorrectos\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 · Correo inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nadie@terapias.pe\",\n  \"password\": \"Clave123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"Correo o contraseña incorrectos\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 · Usuario inactivo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"diego.ramirez@terapias.pe\",\n  \"password\": \"Clave123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"El usuario está inactivo\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 · Rol cliente no permitido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana.quispe@correo.com\",\n  \"password\": \"Clave123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"Tu rol (CLIENTE) no puede usar esta API\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 · Login sin datos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"\",\n  \"password\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Errores de validación\", function () { pm.expect(pm.response.json().errors).to.be.an(\"array\").that.is.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 · Listar servicios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/servicios"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Lista con datos de prueba\", function () { pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 · Listar servicios activos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/servicios/activos"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Todos los servicios están activos\", function () { const datos = pm.response.json(); pm.expect(datos).to.be.an(\"array\").that.is.not.empty; datos.forEach(servicio => pm.expect(servicio.activo).to.eql(true)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 · Buscar por título",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/servicios/buscar?titulo=terapia"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resultados coincidentes\", function () { const datos = pm.response.json(); pm.expect(datos).to.be.an(\"array\").that.is.not.empty; datos.forEach(servicio => pm.expect(servicio.titulo.toLowerCase()).to.include(\"terapia\")); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11 · Obtener servicio 1",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/servicios/1"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Servicio solicitado\", function () { pm.expect(pm.response.json().id).to.eql(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12 · Obtener servicio inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/servicios/999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 · Crear servicio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/servicios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"{{tituloPrueba}}\",\n  \"descripcion\": \"Masaje en puntos de los pies\",\n  \"costo\": 85,\n  \"duracion\": 40,\n  \"foto\": null,\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"servicioCreadoId\", pm.response.json().id); }",
+                  "pm.test(\"Servicio persistido\", function () { const datos = pm.response.json(); pm.expect(datos.id).to.be.a(\"number\"); pm.expect(datos.titulo).to.eql(pm.collectionVariables.get(\"tituloPrueba\")); pm.expect(datos.costo).to.eql(85); pm.expect(datos.activo).to.eql(true); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "14 · Título repetido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/servicios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"{{tituloPrueba}}\",\n  \"descripcion\": \"Masaje en puntos de los pies\",\n  \"costo\": 85,\n  \"duracion\": 40,\n  \"foto\": null,\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"Ya existe un servicio con ese título\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "15 · Servicio con datos inválidos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/servicios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"\",\n  \"costo\": -5,\n  \"duracion\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Errores de validación\", function () { pm.expect(pm.response.json().errors).to.be.an(\"array\").that.is.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "16 · Actualizar el servicio creado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/servicios/{{servicioCreadoId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"{{tituloPrueba}}\",\n  \"descripcion\": \"Masaje en puntos de los pies\",\n  \"costo\": 90,\n  \"duracion\": 40,\n  \"foto\": null,\n  \"activo\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Costo y estado actualizados\", function () { const datos = pm.response.json(); pm.expect(datos.id).to.eql(Number(pm.collectionVariables.get(\"servicioCreadoId\"))); pm.expect(datos.costo).to.eql(90); pm.expect(datos.activo).to.eql(false); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "17 · Actualizar servicio inexistente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/servicios/999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"{{tituloPrueba}}\",\n  \"descripcion\": \"Masaje en puntos de los pies\",\n  \"costo\": 85,\n  \"duracion\": 40,\n  \"foto\": null,\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "18 · Eliminar servicio en uso",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/servicios/1"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"No se puede eliminar\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "19 · Eliminar servicio creado",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/servicios/{{servicioCreadoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "20 · Volver a eliminar el servicio",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/servicios/{{servicioCreadoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
