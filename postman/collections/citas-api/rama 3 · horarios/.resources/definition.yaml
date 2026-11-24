@@ -1,0 +1,9 @@
+$kind: collection
+scripts:
+  - type: http:beforeRequest
+    code: |-
+      if (pm.info.requestName.startsWith("01")) {
+          pm.collectionVariables.unset("horarioCreadoId");
+      }
+    language: text/javascript
+order: 4000

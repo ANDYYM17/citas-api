@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/api/horarios"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "terapistaId": 999,
+      "diaSemana": 2,
+      "horaInicio": "08:00",
+      "horaFin": "12:00"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 400", function () { pm.response.to.have.status(400); });
+      pm.test("Mensaje de error", function () { pm.expect(pm.response.json().message).to.include("La terapista 999 no existe"); });
+    language: text/javascript
+order: 9000

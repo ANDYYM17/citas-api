@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/api/horarios"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "terapistaId": 6,
+      "diaSemana": 8,
+      "horaInicio": "08:00",
+      "horaFin": "12:00"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 400", function () { pm.response.to.have.status(400); });
+      pm.test("Validación del día", function () { const errores = pm.response.json().errors; pm.expect(errores).to.be.an("array"); pm.expect(errores.map(error => error.field)).to.include("diaSemana"); });
+    language: text/javascript
+order: 10000

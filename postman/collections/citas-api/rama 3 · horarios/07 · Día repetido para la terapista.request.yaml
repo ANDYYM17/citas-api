@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/api/horarios"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "terapistaId": 6,
+      "diaSemana": 1,
+      "horaInicio": "14:00",
+      "horaFin": "18:00"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 409", function () { pm.response.to.have.status(409); });
+      pm.test("Mensaje de error", function () { pm.expect(pm.response.json().message).to.include("La terapista ya tiene horario ese día"); });
+    language: text/javascript
+order: 7000
