@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/terapistas/buscar?texto=gut"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  texto: gut
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 200", function () { pm.response.to.have.status(200); });
+      pm.test("Coincidencia en nombres o apellidos", function () { const datos = pm.response.json(); pm.expect(datos).to.be.an("array").that.is.not.empty; datos.forEach(terapista => pm.expect((terapista.nombres + " " + terapista.apellidos).toLowerCase()).to.include("gut")); });
+    language: text/javascript
+order: 3000

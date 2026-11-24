@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/api/terapistas"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "usuarioId": 23,
+      "nombres": "Valeria",
+      "apellidos": "Torres Rojas",
+      "dni": "49012345",
+      "telefono": "987100207",
+      "activo": true
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 201", function () { pm.response.to.have.status(201); });
+      if (pm.response.code === 201) { pm.collectionVariables.set("terapistaCreadaId", pm.response.json().id); }
+      pm.test("Perfil creado para el usuario 23", function () { const datos = pm.response.json(); pm.expect(datos.id).to.be.a("number"); pm.expect(datos.usuarioId).to.eql(23); pm.expect(datos.dni).to.eql("49012345"); pm.expect(datos.activo).to.eql(true); });
+    language: text/javascript
+order: 7000

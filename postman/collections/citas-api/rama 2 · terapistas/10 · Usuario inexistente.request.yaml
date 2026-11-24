@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/api/terapistas"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "usuarioId": 999,
+      "nombres": "Valeria",
+      "apellidos": "Torres Rojas",
+      "dni": "49012348",
+      "telefono": "987100207",
+      "activo": true
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 400", function () { pm.response.to.have.status(400); });
+      pm.test("Mensaje de error", function () { pm.expect(pm.response.json().message).to.include("El usuario 999 no existe"); });
+    language: text/javascript
+order: 10000

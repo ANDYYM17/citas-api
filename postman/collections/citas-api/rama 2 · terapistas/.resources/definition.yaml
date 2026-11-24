@@ -1,0 +1,9 @@
+$kind: collection
+scripts:
+  - type: http:beforeRequest
+    code: |-
+      if (pm.info.requestName.startsWith("01")) {
+          pm.collectionVariables.unset("terapistaCreadaId");
+      }
+    language: text/javascript
+order: 3000

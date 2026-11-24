@@ -1,0 +1,6 @@
+name: Codespaces-rama2
+values:
+  - key: baseUrl
+    value: https://fluffy-space-dollop-v65p57r9jgxphx5gv-8080.app.github.dev
+  - key: perfilEsperado
+    value: demo
