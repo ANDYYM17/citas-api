@@ -1,9 +1,8 @@
 $kind: collection
 description: "Pruebas de las secciones 5.1, 5.2 y 5.3 de la guía SENATI (páginas 35–36, 43–44 y 49–50). Ejecutar la colección completa en orden: main, rama 1, rama 2 y rama 3. Los registros creados para las pruebas se eliminan al finalizar. Para Codespaces cambia baseUrl por la dirección del puerto 8080, sin barra final, y perfilEsperado a demo."
 variables:
-  baseUrl: http://localhost:8080
-  perfilEsperado: dev
+  baseUrl: ""
+  perfilEsperado: ""
   tituloPrueba: ""
   servicioCreadoId: ""
   terapistaCreadaId: ""
-  horarioCreadoId: ""
