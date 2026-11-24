@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/api/horarios/terapista/1"
+method: GET
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 200", function () { pm.response.to.have.status(200); });
+      pm.test("Terapista y orden por día y hora", function () { const datos = pm.response.json(); pm.expect(datos).to.be.an("array").that.is.not.empty; datos.forEach((horario, i) => { pm.expect(horario.terapistaId).to.eql(1); if (i > 0) { const anterior = datos[i - 1]; pm.expect(anterior.diaSemana < horario.diaSemana || (anterior.diaSemana === horario.diaSemana && anterior.horaInicio <= horario.horaInicio)).to.eql(true); } }); });
+    language: text/javascript
+order: 2000

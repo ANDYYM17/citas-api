@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "citas-api",
-    "description": "Pruebas de las secciones 5.1 y 5.2 de la guía SENATI (páginas 35–36 y 43–44). Ejecutar la colección completa en orden: main, rama 1 y rama 2. Los registros creados para las pruebas se eliminan al finalizar. Para Codespaces cambia baseUrl por la dirección del puerto 8080, sin barra final, y perfilEsperado a demo.",
+    "description": "Pruebas de las secciones 5.1, 5.2 y 5.3 de la guía SENATI (páginas 35–36, 43–44 y 49–50). Ejecutar la colección completa en orden: main, rama 1, rama 2 y rama 3. Los registros creados para las pruebas se eliminan al finalizar. Para Codespaces cambia baseUrl por la dirección del puerto 8080, sin barra final, y perfilEsperado a demo.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -27,6 +27,11 @@
     },
     {
       "key": "terapistaCreadaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "horarioCreadoId",
       "value": "",
       "type": "string"
     }
@@ -1185,6 +1190,425 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rama 3 · horarios",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.info.requestName.startsWith(\"01\")) {",
+              "    pm.collectionVariables.unset(\"horarioCreadoId\");",
+              "}"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "01 · Listar horarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/horarios"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Lista con horarios de prueba\", function () { pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 · Horarios de la terapista 1",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/horarios/terapista/1"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Terapista y orden por día y hora\", function () { const datos = pm.response.json(); pm.expect(datos).to.be.an(\"array\").that.is.not.empty; datos.forEach((horario, i) => { pm.expect(horario.terapistaId).to.eql(1); if (i > 0) { const anterior = datos[i - 1]; pm.expect(anterior.diaSemana < horario.diaSemana || (anterior.diaSemana === horario.diaSemana && anterior.horaInicio <= horario.horaInicio)).to.eql(true); } }); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 · Horarios del sábado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/horarios/dia/6"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Día y orden por hora de inicio\", function () { const datos = pm.response.json(); pm.expect(datos).to.be.an(\"array\").that.is.not.empty; datos.forEach((horario, i) => { pm.expect(horario.diaSemana).to.eql(6); if (i > 0) { pm.expect(datos[i - 1].horaInicio <= horario.horaInicio).to.eql(true); } }); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 · Obtener horario 1",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/horarios/1"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Horario solicitado\", function () { pm.expect(pm.response.json().id).to.eql(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 · Obtener horario inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/horarios/999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 · Crear horario de lunes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/horarios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"terapistaId\": 6,\n  \"diaSemana\": 1,\n  \"horaInicio\": \"08:00\",\n  \"horaFin\": \"12:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"horarioCreadoId\", pm.response.json().id); }",
+                  "pm.test(\"Horario creado para la terapista 6\", function () { const datos = pm.response.json(); pm.expect(datos.id).to.be.a(\"number\"); pm.expect(datos.terapistaId).to.eql(6); pm.expect(datos.diaSemana).to.eql(1); pm.expect(datos.horaInicio).to.match(/^08:00(:00)?$/); pm.expect(datos.horaFin).to.match(/^12:00(:00)?$/); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 · Día repetido para la terapista",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/horarios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"terapistaId\": 6,\n  \"diaSemana\": 1,\n  \"horaInicio\": \"14:00\",\n  \"horaFin\": \"18:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"La terapista ya tiene horario ese día\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 · Inicio después del fin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/horarios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"terapistaId\": 6,\n  \"diaSemana\": 2,\n  \"horaInicio\": \"15:00\",\n  \"horaFin\": \"10:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"La hora de inicio debe ser menor que la hora de fin\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 · Terapista inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/horarios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"terapistaId\": 999,\n  \"diaSemana\": 2,\n  \"horaInicio\": \"08:00\",\n  \"horaFin\": \"12:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Mensaje de error\", function () { pm.expect(pm.response.json().message).to.include(\"La terapista 999 no existe\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 · Día fuera de rango",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/horarios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"terapistaId\": 6,\n  \"diaSemana\": 8,\n  \"horaInicio\": \"08:00\",\n  \"horaFin\": \"12:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"Validación del día\", function () { const errores = pm.response.json().errors; pm.expect(errores).to.be.an(\"array\"); pm.expect(errores.map(error => error.field)).to.include(\"diaSemana\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11 · Actualizar horario creado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/horarios/{{horarioCreadoId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"terapistaId\": 6,\n  \"diaSemana\": 1,\n  \"horaInicio\": \"09:00\",\n  \"horaFin\": \"13:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Horas actualizadas\", function () { const datos = pm.response.json(); pm.expect(datos.id).to.eql(Number(pm.collectionVariables.get(\"horarioCreadoId\"))); pm.expect(datos.horaInicio).to.match(/^09:00(:00)?$/); pm.expect(datos.horaFin).to.match(/^13:00(:00)?$/); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12 · Eliminar horario creado",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/horarios/{{horarioCreadoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 · Volver a eliminar el horario",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/horarios/{{horarioCreadoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
                 ]
               }
             }

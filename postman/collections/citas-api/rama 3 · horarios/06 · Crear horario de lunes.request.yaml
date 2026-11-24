@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/horarios"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "terapistaId": 6,
+      "diaSemana": 1,
+      "horaInicio": "08:00",
+      "horaFin": "12:00"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 201", function () { pm.response.to.have.status(201); });
+      if (pm.response.code === 201) { pm.collectionVariables.set("horarioCreadoId", pm.response.json().id); }
+      pm.test("Horario creado para la terapista 6", function () { const datos = pm.response.json(); pm.expect(datos.id).to.be.a("number"); pm.expect(datos.terapistaId).to.eql(6); pm.expect(datos.diaSemana).to.eql(1); pm.expect(datos.horaInicio).to.match(/^08:00(:00)?$/); pm.expect(datos.horaFin).to.match(/^12:00(:00)?$/); });
+    language: text/javascript
+order: 6000
